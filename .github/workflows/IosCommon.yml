@@ -1,0 +1,62 @@
+name: IosCommon
+
+on:
+  workflow_call:
+    inputs:
+      artifacts:
+        required: true
+        type: string
+      toolchain:
+        required: true
+        type: string
+      build:
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: ${{ inputs.toolchain }}
+            override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo-mobile/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: davidB/rust-cargo-make@v1
+      - name: Install dependencies
+        run: |
+          brew install ios-deploy
+          brew install xcodegen
+      # - name: Create private config file
+      #   env:
+      #      PRIVATE_TOML: ${{ secrets.PRIVATE_CONFIG }}
+      #   run: 'echo "$PRIVATE_TOML" > private.toml'
+        shell: bash
+      - name: Build project
+        if: ${{ inputs.build == 'fast' }}
+        run: cargo make ios_build
+      - name: Build project
+        if: ${{ inputs.build != 'fast' }}
+        run: cargo make ios_build_release
+      - name: Upload
+        if: ${{ inputs.artifacts == 'true' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ios
+          path: module/renderer/platform/ios/xcode/out/Build/Products
+          retention-days: 1
+
