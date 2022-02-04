@@ -1,0 +1,158 @@
+
+name : Forward
+
+on :
+  push :
+    branches : [ alpha ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs :
+
+  android_fast:
+    if: "contains( github.event.head_commit.message, '[test_rapid]' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/AndroidCommon.yml@master
+    with:
+      artifacts: 'false'
+      build: 'fast'
+      toolchain: 'stable'
+  android:
+    if: "contains( github.event.head_commit.message, '[test]' ) || startsWith( github.event.head_commit.message, 'Merge ' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/AndroidCommon.yml@master
+    with:
+      artifacts: 'true'
+      build: 'slow'
+      toolchain: 'stable'
+
+  desktop_fast:
+    if: "contains( github.event.head_commit.message, '[test_rapid]' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/DesktopCommon.yml@master
+    with:
+      artifacts: 'false'
+      build: 'fast'
+      toolchain: 'stable'
+  desktop:
+    if: "contains( github.event.head_commit.message, '[test]' ) || startsWith( github.event.head_commit.message, 'Merge ' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/DesktopCommon.yml@master
+    with:
+      artifacts: 'true'
+      build: 'slow'
+      toolchain: 'nightly'
+
+  ios_fast:
+    if: "contains( github.event.head_commit.message, '[test_rapid]' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/IosCommon.yml@master
+    with:
+      artifacts: 'false'
+      build: 'fast'
+      toolchain: 'stable'
+  ios:
+    if: "contains( github.event.head_commit.message, '[test]' ) || startsWith( github.event.head_commit.message, 'Merge ' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/IosCommon.yml@master
+    with:
+      artifacts: 'true'
+      build: 'slow'
+      toolchain: 'stable'
+
+  web_fast:
+    if: "contains( github.event.head_commit.message, '[test_rapid]' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/WebCommon.yml@master
+    with:
+      artifacts: 'false'
+      build: 'fast'
+      toolchain: 'stable'
+  web:
+    if: "contains( github.event.head_commit.message, '[test]' ) || startsWith( github.event.head_commit.message, 'Merge ' )"
+    uses: Learn-Together-Pro/rust_game_template/.github/workflows/WebCommon.yml@master
+    with:
+      artifacts: 'true'
+      build: 'slow'
+      toolchain: 'nightly'
+
+  forward :
+    needs:
+      - android
+      - desktop
+      - ios
+      - web
+      # - artifacts_forward
+    runs-on : ubuntu-latest
+    steps :
+      - uses: actions/checkout@v2
+      - uses : everlytic/branch-merge@1.1.2
+        with :
+          github_token : ${{ secrets.PRIVATE_GITHUB_TOKEN }}
+          source_ref : alpha
+          target_branch : beta
+          commit_message_template : 'Merge {source_ref} into {target_branch} [Automated]'
+
+  # artifacts_forward :
+  #   needs: [ android, desktop, ios, web ]
+  #   runs-on : ubuntu-latest
+  #   steps :
+  #     - uses: actions/checkout@v2
+  #     - run: rm -rf out/*
+  #     - uses: actions/checkout@v2
+  #     - name: Install latest toolchain
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #           toolchain: stable
+  #           override: true
+  #     - run : cargo doc
+  #     - run : cp -R target/doc out/doc
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: ubuntu
+  #         path: out/linux_release
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: macos
+  #         path: out/macos_release
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: windows
+  #         path: out/windows_release
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: android
+  #         path: out/android_release
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: ios
+  #         path: out/ios_release
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: web
+  #         path: out/web_release
+  #
+  #     - name: Pushes to another repository
+  #       uses: cpina/github-action-push-to-another-repository@main
+  #       env:
+  #         API_TOKEN_GITHUB: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
+  #       with:
+  #         source-directory: out
+  #         target-directory: out/${{ github.ref_name }}
+  #         destination-github-username: 'Wandalen'
+  #         destination-repository-name: 'rust_game_template'
+  #         user-email: dm.vict.kr@gmail.com
+  #         target-branch: master
+  #
+  #     - run: rm -rf out/*
+  #     - run: git checkout out/
+  #     - run: echo '[linux](https://github.com/Wandalen/rust_game_template/raw/master/out/${{ github.ref_name }}/linux_release/test)' >> out/${{ github.ref_name }}.md
+  #     - run: echo ' ' >> out/${{ github.ref_name }}.md
+  #     - run: echo '[macos](https://github.com/Wandalen/rust_game_template/raw/master/out/${{ github.ref_name }}/macos_release/test)' >> out/${{ github.ref_name }}.md
+  #     - run: echo ' ' >> out/${{ github.ref_name }}.md
+  #     - run: echo '[windows](https://github.com/Wandalen/rust_game_template/raw/master/out/${{ github.ref_name }}/windows_release)' >> out/${{ github.ref_name }}.md
+  #     - run: echo ' ' >> out/${{ github.ref_name }}.md
+  #     - run: echo '[android](https://github.com/Wandalen/rust_game_template/raw/master/out/${{ github.ref_name }}/android_release)' >> out/${{ github.ref_name }}.md
+  #     - run: echo ' ' >> out/${{ github.ref_name }}.md
+  #     - run: echo '[ios](https://github.com/Wandalen/rust_game_template/raw/master/out/${{ github.ref_name }}/ios_release)' >> out/${{ github.ref_name }}.md
+  #     - run: echo ' ' >> out/${{ github.ref_name }}.md
+  #     - run: echo '[web](https://github.com/Wandalen/rust_game_template/raw/master/out/${{ github.ref_name }}/web_release)' >> out/${{ github.ref_name }}.md
+  #     - uses: quizlet/commit-changes@v0.2.0
+  #       with:
+  #         token: ${{ secrets.PRIVATE_TOKEN }}
+  #         message: 'Added links to release ${{ github.ref_name }} [automated]'
+  #         glob-patterns: out/
