@@ -1,0 +1,65 @@
+[config]
+skip_core_tasks = true
+skip_git_env_info = true
+skip_rust_env_info = true
+skip_crate_env_info = true
+# reduce_output = true
+
+# Private
+
+[tasks.desktop_watch]
+private = true
+watch = { postpone = true, watch = [ "${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/../../src/" ] }
+
+# Public
+
+[tasks.desktop_build]
+description = "Build debug of desktop target."
+private = false
+category = "Desktop"
+command = "cargo"
+args = [
+  "build",
+  "--manifest-path", "${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/../../Cargo.toml",
+  "--bin", "desktop"
+]
+
+[tasks.desktop_build_release]
+description = "Build release of desktop target."
+private = false
+category = "Desktop"
+command = "cargo"
+args = [
+  "build",
+  "--manifest-path", "${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/../../Cargo.toml",
+  "--bin", "desktop",
+  "--release"
+]
+
+[tasks.desktop_run]
+description = "Run debug of desktop target"
+private = false
+category = "Desktop"
+command = "cargo"
+args = [
+  "run",
+  "--manifest-path", "${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/../../Cargo.toml",
+  "--bin", "desktop"
+]
+
+[tasks.desktop_build_watching]
+description = "Rebuild debug of desktop target on file change."
+private = false
+extend = "desktop_watch"
+dependencies = [ "desktop_build" ]
+
+[tasks.desktop_run_watching]
+description = "Rerun debug desktop target on file change."
+private = false
+extend = "desktop_watch"
+dependencies = [ "desktop_run" ]
+
+# [tasks.echo]
+# private = false
+# command = "echo"
+# args = [ "CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY : ${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}" ]
