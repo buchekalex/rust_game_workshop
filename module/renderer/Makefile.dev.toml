@@ -1,0 +1,42 @@
+[config]
+additional_profiles = [ "wgpu", "bevy" ]
+
+[env]
+RUST_GAME_TEMPLATE_PROFILE = "wgpu"
+
+[tasks.step_install_dependencies]
+private = true
+condition = { env_set = [ "RUST_GAME_TEMPLATE_PROFILE" ], files_not_exist = [ "${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/step/node_modules" ] }
+script_runner = "@shell"
+script = '''
+cd ${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/step
+npm i
+'''
+
+[tasks.change_profile]
+private = true
+script_runner = "@duckscript"
+condition = { env_set = [ "RUST_GAME_TEMPLATE_PROFILE" ] }
+dependencies = [ "step_install_dependencies" ]
+command = "node"
+args = [
+  "${CARGO_MAKE_CURRENT_TASK_INITIAL_MAKEFILE_DIRECTORY}/step/hard_link.ss"
+]
+
+[tasks.use_wgpu]
+category = "Template development"
+description = "Switch to wgpu template"
+env = { RUST_GAME_TEMPLATE_PROFILE = "wgpu" }
+run_task = "change_profile"
+
+[tasks.use_bevy]
+category = "Template development"
+description = "Switch to bevy template"
+env = { RUST_GAME_TEMPLATE_PROFILE = "bevy" }
+run_task = "change_profile"
+
+[tasks.init]
+condition = { env_true = [ "CI" ], env_not_set = [ "RUST_GAME_TEMPLATE_INIT_DONE" ] }
+env = { RUST_GAME_TEMPLATE_INIT_DONE = true }
+run_task = "change_profile"
+
