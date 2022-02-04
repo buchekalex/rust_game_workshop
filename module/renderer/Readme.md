@@ -1,0 +1,127 @@
+# Rust Game Template
+[![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/emersion/stability-badges#experimental) [![ios](https://github.com/Wandalen/rust_game_template/actions/workflows/iOS.yml/badge.svg)](https://github.com/Wandalen/rust_game_template/actions/workflows/iOS.yml) [![android](https://github.com/Wandalen/rust_game_template/actions/workflows/Android.yml/badge.svg)](https://github.com/Wandalen/rust_game_template/actions/workflows/Android.yml) [![desktop](https://github.com/Wandalen/rust_game_template/actions/workflows/Desktop.yml/badge.svg)](https://github.com/Wandalen/rust_game_template/actions/workflows/Desktop.yml) [![web](https://github.com/Wandalen/rust_game_template/actions/workflows/Web.yml/badge.svg)](https://github.com/Wandalen/rust_game_template/actions/workflows/Web.yml)
+
+Neutral cross-platform Rust game template.
+
+## General prerequisites
+
+```
+cargo install cargo-make
+```
+
+## How to run on Desktop
+
+```
+cargo make desktop_run
+```
+
+## How to run on Web
+
+Run web target:
+
+```
+cargo make web_run
+```
+
+To speedup incremental builds use:
+
+```
+cargo make web_run_watching
+```
+
+This command doesn't perform crate installation checks to reduce total build time.
+
+## How to run on Android
+
+Prerequisites:
+
+* [Android setup](https://github.com/dodorare/crossbow/wiki)
+* NDK: 22.1.7171670
+* API Level : 30.0.3
+
+Connect your Android device or start an emulator and then execute:
+
+```
+cargo make android_run
+```
+
+## How to run on iOS
+
+Create the file `private.toml` at the root of the repo and add next fields:
+
+```toml
+[ios]
+development_team = "PRIVATE_APPLE_TEAM_ID"
+```
+
+Any field can also may contain environment variable as a value:
+
+```toml
+[ios]
+development_team = "${PRIVATE_APPLE_TEAM_ID}"
+```
+
+In this case value will be taken from your environment variable during the build.
+
+Then run:
+
+```
+cargo make ios_run
+```
+
+Generated Xcode project can be found at `module/renderer/platform/ios/xcode`.
+
+## Commands
+
+To get list of commands use command `cargo make --list-all-steps`
+
+```
+Android
+----------
+android_build - Build debug of android target.
+android_build_release - Build release of android target.
+android_rebuild - Rebuild debug of android target.
+android_run - Run android target.
+android_run_watching - Rebuild and reaload android target on file change.
+
+Desktop
+----------
+default - Empty Task
+desktop_build - Build debug of desktop target.
+desktop_build_linux_on_mac - Build desktop target for GNU/Linux distributives on MacOS.
+desktop_build_release - Build release of desktop target.
+desktop_build_windows_on_linux - Build target for Windows on Debian-based GNU/Linux disributives.
+desktop_build_windows_on_mac - Build target for Windows on MacOS.
+desktop_rebuild - Rebuild debug of desktop target.
+desktop_run - Run debug of desktop target
+desktop_run_watching - Rerun debug desktop target on file change.
+
+Template development
+----------
+use_bevy - Switch to bevy template
+use_wgpu - Switch to wgpu template
+
+Web
+----------
+web_build - Build debug of web target.
+web_build_release - Build release of web target.
+web_rebuild - Rebuild debug of web target.
+web_run - Build and run web target.
+web_run_watching - Rebuild debug of web target and run it.
+web_server_run - Run HTTP server on port ${CARGO_MAKE_WEB_PORT}.
+
+iOS
+----------
+ios_build - Build debug of ios target.
+ios_build_release - Build release of ios target.
+ios_clean - Cleanup generated files of ios target.
+ios_rebuild - Rebuild debug of ios target.
+ios_run - Run debug of ios target.
+ios_run_watching - Rerun debug of ios target on file change.
+
+wasi
+----------
+wasi_build - Build debug of wasi target.
+wasi_run - Run debug of wasi target.
+wasi_run_watching - Run debug of wasi target.
+```
